@@ -26,10 +26,16 @@ func GetHosts() ([]ssh.ClientConfig, error) {
 			if netName == "lo" || netName == "docker0" {
 				continue
 			}
+			if netName == "tailscale0" {
+				netName = "tail"
+			}
+			if netName == "eth0" {
+				netName = "bridged"
+			}
 			for _, addr := range net.Addresses {
 				if addr.Family == "inet" {
 					configs = append(configs, ssh.ClientConfig{
-						Host:     instance.Name,
+						Host:     instance.Name + "." + netName,
 						HostName: addr.Address,
 					})
 				}
