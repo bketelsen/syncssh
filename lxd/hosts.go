@@ -3,6 +3,7 @@ package lxd
 import (
 	"encoding/json"
 	"os/exec"
+	"strings"
 
 	"github.com/lxc/lxd/shared/api"
 
@@ -22,6 +23,12 @@ func GetHosts() ([]ssh.ClientConfig, error) {
 		return configs, err
 	}
 	for _, instance := range instances {
+		cmd := exec.Command("lxc", "config", "get", instance.Name, "user.sshuser")
+		bb, err := cmd.CombinedOutput()
+		if err != nil {
+			return configs, err
+		}
+		user := strings.TrimSpace(string(bb))
 		for netName, net := range instance.State.Network {
 			if netName == "lo" || netName == "docker0" {
 				continue
@@ -32,11 +39,13 @@ func GetHosts() ([]ssh.ClientConfig, error) {
 			if netName == "eth0" {
 				netName = "bridged"
 			}
+
 			for _, addr := range net.Addresses {
 				if addr.Family == "inet" {
 					configs = append(configs, ssh.ClientConfig{
 						Host:     instance.Name + "." + netName,
 						HostName: addr.Address,
+						User:     user,
 					})
 				}
 			}

@@ -31,6 +31,7 @@ import (
 )
 
 var cfgFile string
+var containerUser string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -58,6 +59,8 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.syncssh.yaml)")
+	rootCmd.PersistentFlags().StringVar(&containerUser, "sshuser", "ubuntu", "ssh user in container")
+	viper.BindPFlag("sshuser", rootCmd.Flags().Lookup("sshuser"))
 }
 
 // initConfig reads in config file and ENV variables if set.
